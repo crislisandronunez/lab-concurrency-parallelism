@@ -53,6 +53,20 @@ public class Account {
     this.balance = newBalance;
   }
 
+  public synchronized void debitBalance(BigDecimal amount) {
+    if (amount == null) {
+      throw new IllegalArgumentException("El importe no puede ser nulo");
+    }
+    if (this.status != AccountStatus.ACTIVE) {
+      throw new IllegalStateException("La cuenta debe estar activa para modificar el saldo");
+    }
+    BigDecimal newBalance = this.balance.subtract(amount);
+    if (newBalance.compareTo(BigDecimal.ZERO) < 0) {
+      throw new IllegalArgumentException("El saldo no puede quedar negativo");
+    }
+    this.balance = newBalance;
+  }
+
   public synchronized void activate() {
     if(this.status == AccountStatus.CLOSED) {
       throw new IllegalStateException("No se puede activar una cuenta cerrada");
