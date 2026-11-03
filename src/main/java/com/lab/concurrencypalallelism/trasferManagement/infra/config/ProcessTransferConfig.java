@@ -1,9 +1,10 @@
 package com.lab.concurrencypalallelism.trasferManagement.infra.config;
 
-import com.lab.concurrencypalallelism.trasferManagement.application.port.in.ProccessTransactionUseCase;
+import com.lab.concurrencypalallelism.trasferManagement.application.port.in.ProcessTransactionUseCase;
 import com.lab.concurrencypalallelism.trasferManagement.application.port.out.AccountPersistence;
+import com.lab.concurrencypalallelism.trasferManagement.application.port.out.ProcessMetrics;
 import com.lab.concurrencypalallelism.trasferManagement.application.port.out.TransactionPersistence;
-import com.lab.concurrencypalallelism.trasferManagement.application.usecase.ProccessTransaction;
+import com.lab.concurrencypalallelism.trasferManagement.application.usecase.ProcessTransaction;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -11,11 +12,13 @@ import org.springframework.context.annotation.Configuration;
 public class ProcessTransferConfig {
 
   @Bean
-  public ProccessTransactionUseCase proccessTransaction(
+  public ProcessTransactionUseCase proccessTransaction(
       TransactionPersistence transactionRepository,
-      AccountPersistence accountRepository) {
+      AccountPersistence accountRepository,
+      ProcessMetrics processMetrics
+  ) {
 
-    return new ProccessTransaction(transactionRepository, accountRepository);
+    return new ProcessTransaction(transactionRepository, accountRepository, processMetrics);
   }
 }
 

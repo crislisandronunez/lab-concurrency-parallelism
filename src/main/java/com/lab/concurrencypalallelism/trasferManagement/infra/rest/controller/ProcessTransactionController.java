@@ -2,7 +2,7 @@
 package com.lab.concurrencypalallelism.trasferManagement.infra.rest.controller;
 
 import com.lab.concurrencypalallelism.trasferManagement.application.command.NewTransaction;
-import com.lab.concurrencypalallelism.trasferManagement.application.port.in.ProccessTransactionUseCase;
+import com.lab.concurrencypalallelism.trasferManagement.application.port.in.ProcessTransactionUseCase;
 import com.lab.concurrencypalallelism.trasferManagement.application.result.ResultTransfer;
 import com.lab.concurrencypalallelism.trasferManagement.infra.rest.dto.ProcessTransactionRequest;
 import com.lab.concurrencypalallelism.trasferManagement.infra.rest.dto.ProcessTransactionResponse;
@@ -19,11 +19,11 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/transactions")
 public class ProcessTransactionController {
 
-  private final ProccessTransactionUseCase proccessTransactionUseCase;
+  private final ProcessTransactionUseCase proccessTransactionUseCase;
   private final ProcessTransactionMapper mapper;
 
   public ProcessTransactionController(
-      ProccessTransactionUseCase proccessTransactionUseCase,
+      ProcessTransactionUseCase proccessTransactionUseCase,
       ProcessTransactionMapper mapper) {
     this.proccessTransactionUseCase = proccessTransactionUseCase;
     this.mapper = mapper;

@@ -1,8 +1,10 @@
+
 package com.lab.concurrencypalallelism.trasferManagement.application.usecase;
 
 import com.lab.concurrencypalallelism.trasferManagement.application.command.NewTransaction;
-import com.lab.concurrencypalallelism.trasferManagement.application.port.in.ProccessTransactionUseCase;
+import com.lab.concurrencypalallelism.trasferManagement.application.port.in.ProcessTransactionUseCase;
 import com.lab.concurrencypalallelism.trasferManagement.application.port.out.AccountPersistence;
+import com.lab.concurrencypalallelism.trasferManagement.application.port.out.ProcessMetrics;
 import com.lab.concurrencypalallelism.trasferManagement.application.port.out.TransactionPersistence;
 import com.lab.concurrencypalallelism.trasferManagement.application.result.ResultTransfer;
 import com.lab.concurrencypalallelism.trasferManagement.domain.enums.AccountStatus;
@@ -11,24 +13,33 @@ import com.lab.concurrencypalallelism.trasferManagement.domain.model.Account;
 import com.lab.concurrencypalallelism.trasferManagement.domain.model.Transaction;
 import java.util.Objects;
 
-public class ProccessTransaction implements
-    ProccessTransactionUseCase {
+public class ProcessTransaction implements ProcessTransactionUseCase {
 
   private final TransactionPersistence transactionRepository;
   private final AccountPersistence accountRepository;
+  private final ProcessMetrics metrics;
 
-  public ProccessTransaction(
+  public ProcessTransaction(
       TransactionPersistence transactionRepository,
-      AccountPersistence accountRepository) {
+      AccountPersistence accountRepository,
+      ProcessMetrics metrics) {
     this.transactionRepository = Objects.requireNonNull(transactionRepository);
     this.accountRepository = Objects.requireNonNull(accountRepository);
+    this.metrics = metrics;
   }
 
   @Override
   public ResultTransfer proccess(NewTransaction newTransaction) {
 
-    Account account = accountRepository.findById(newTransaction.accountId())
-        .orElseThrow(() -> new IllegalArgumentException("La cuenta no existe"));
+    Object findAccountSample = metrics.start();
+    Account account;
+
+    try {
+      account = accountRepository.findById(newTransaction.accountId())
+          .orElseThrow(() -> new IllegalArgumentException("La cuenta no existe"));
+    } finally {
+      metrics.stop(findAccountSample, "transaction", "find_account");
+    }
 
     if (account.getStatus() != AccountStatus.ACTIVE) {
       throw new IllegalArgumentException("La cuenta no está activa");
@@ -44,7 +55,14 @@ public class ProccessTransaction implements
 
     account.debitBalance(newTransaction.amount());
 
-    Account updatedAccount = accountRepository.save(account);
+    Object saveAccountSample = metrics.start();
+    Account updatedAccount;
+
+    try {
+      updatedAccount = accountRepository.save(account);
+    } finally {
+      metrics.stop(saveAccountSample, "transaction", "save_account");
+    }
 
     Transaction transaction = Transaction.create(
         updatedAccount.getId(),
@@ -55,7 +73,14 @@ public class ProccessTransaction implements
 
     transaction.complete();
 
-    Transaction savedTransaction = transactionRepository.save(transaction);
+    Object saveTransactionSample = metrics.start();
+    Transaction savedTransaction;
+
+    try {
+      savedTransaction = transactionRepository.save(transaction);
+    } finally {
+      metrics.stop(saveTransactionSample, "transaction", "save_transaction");
+    }
 
     return new ResultTransfer(
         savedTransaction.getId(),
