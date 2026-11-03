@@ -4,7 +4,7 @@ import com.lab.concurrencypalallelism.trasferManagement.domain.model.Account;
 import java.util.Optional;
 import java.util.UUID;
 
-public interface AccountRepository {
+public interface AccountPersistence {
 
   Account save(Account account);
 

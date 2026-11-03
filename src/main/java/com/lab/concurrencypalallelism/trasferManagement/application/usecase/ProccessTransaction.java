@@ -2,8 +2,8 @@ package com.lab.concurrencypalallelism.trasferManagement.application.usecase;
 
 import com.lab.concurrencypalallelism.trasferManagement.application.command.NewTransaction;
 import com.lab.concurrencypalallelism.trasferManagement.application.port.in.ProccessTransactionUseCase;
-import com.lab.concurrencypalallelism.trasferManagement.application.port.out.AccountRepository;
-import com.lab.concurrencypalallelism.trasferManagement.application.port.out.TransactionRepository;
+import com.lab.concurrencypalallelism.trasferManagement.application.port.out.AccountPersistence;
+import com.lab.concurrencypalallelism.trasferManagement.application.port.out.TransactionPersistence;
 import com.lab.concurrencypalallelism.trasferManagement.application.result.ResultTransfer;
 import com.lab.concurrencypalallelism.trasferManagement.domain.enums.AccountStatus;
 import com.lab.concurrencypalallelism.trasferManagement.domain.enums.TransferType;
@@ -14,12 +14,12 @@ import java.util.Objects;
 public class ProccessTransaction implements
     ProccessTransactionUseCase {
 
-  private final TransactionRepository transactionRepository;
-  private final AccountRepository accountRepository;
+  private final TransactionPersistence transactionRepository;
+  private final AccountPersistence accountRepository;
 
   public ProccessTransaction(
-      TransactionRepository transactionRepository,
-      AccountRepository accountRepository) {
+      TransactionPersistence transactionRepository,
+      AccountPersistence accountRepository) {
     this.transactionRepository = Objects.requireNonNull(transactionRepository);
     this.accountRepository = Objects.requireNonNull(accountRepository);
   }

@@ -40,6 +40,18 @@ public class Transaction {
         category);
   }
 
+  public static Transaction restore(UUID id, UUID accountId, TransferType type, BigDecimal amount, Instant createdAt, TransferStatus status, Category category) {
+    validate(amount, accountId, type, category);
+    return new Transaction(
+        id,
+        accountId,
+        type,
+        amount,
+        createdAt,
+        status,
+        category);
+  }
+
   private static void validate(BigDecimal amount, UUID accountId, TransferType type, Category category) {
 
     if (amount == null || amount.compareTo(BigDecimal.ZERO) <= 0) {

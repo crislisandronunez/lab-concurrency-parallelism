@@ -27,6 +27,11 @@ public class Account {
     return new Account(UUID.randomUUID(), holder, balance, currency, AccountStatus.ACTIVE);
   }
 
+  public static Account restore(UUID id, String holder, BigDecimal balance, Currency currency, AccountStatus status) {
+    validate(holder, balance, currency);
+    return new Account(id, holder, balance, currency, status);
+  }
+
   private static void validate(String holder, BigDecimal balance, Currency currency) {
     if (holder == null || holder.isBlank()) {
       throw new IllegalArgumentException("El nombre del titular no puede ser nulo o vacío");
