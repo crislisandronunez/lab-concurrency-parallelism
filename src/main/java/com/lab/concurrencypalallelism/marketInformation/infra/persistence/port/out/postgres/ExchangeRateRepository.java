@@ -7,6 +7,7 @@ import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.UUID;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.transaction.annotation.Transactional;
 
 public interface ExchangeRateRepository extends JpaRepository<ExchangeRateEntity, UUID> {
 
@@ -16,6 +17,8 @@ public interface ExchangeRateRepository extends JpaRepository<ExchangeRateEntity
     WHERE (:fromCurrency IS NULL OR e.fromCurrency = :fromCurrency)
       AND (:toCurrency IS NULL OR e.toCurrency = :toCurrency)
     """)
+
+  @Transactional(readOnly = true)
   List<ExchangeRateEntity> findByCurrencies(
       @Param("fromCurrency") Currency fromCurrency,
       @Param("toCurrency") Currency toCurrency
