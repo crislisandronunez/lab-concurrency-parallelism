@@ -120,6 +120,7 @@ public class CreateMarketInformation implements MarketInformation {
         stock.getVolume(),
         stock.getUpdateAt());
   }
+
   private List<ExchangeRateResult> getExchangeRate(Currency currency1, Currency currency2){
 
     Object findExchangeRateSample = marketMetrics.start();

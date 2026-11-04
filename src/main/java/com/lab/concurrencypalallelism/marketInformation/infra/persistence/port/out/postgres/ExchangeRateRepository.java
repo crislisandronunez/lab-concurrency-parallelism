@@ -1,4 +1,4 @@
-package com.lab.concurrencypalallelism.marketInformation.infra.persistence.port.out;
+package com.lab.concurrencypalallelism.marketInformation.infra.persistence.port.out.postgres;
 
 import com.lab.concurrencypalallelism.marketInformation.domain.enums.Currency;
 import com.lab.concurrencypalallelism.marketInformation.infra.persistence.entity.ExchangeRateEntity;
