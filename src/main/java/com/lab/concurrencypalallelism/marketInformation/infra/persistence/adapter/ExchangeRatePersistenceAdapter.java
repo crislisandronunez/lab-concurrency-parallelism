@@ -3,6 +3,7 @@ package com.lab.concurrencypalallelism.marketInformation.infra.persistence.adapt
 import com.lab.concurrencypalallelism.marketInformation.application.port.out.ExchangeRatePersistence;
 import com.lab.concurrencypalallelism.marketInformation.domain.enums.Currency;
 import com.lab.concurrencypalallelism.marketInformation.domain.model.ExchangeRate;
+import com.lab.concurrencypalallelism.marketInformation.infra.metrics.MarketCacheMetrics;
 import com.lab.concurrencypalallelism.marketInformation.infra.persistence.mapper.ExchangeRateMapper;
 import com.lab.concurrencypalallelism.marketInformation.infra.persistence.port.out.postgres.ExchangeRateRepository;
 import com.lab.concurrencypalallelism.marketInformation.infra.persistence.port.out.redis.mapper.ExchangeRateCacheMapper;
@@ -19,16 +20,19 @@ public class ExchangeRatePersistenceAdapter implements ExchangeRatePersistence {
   private final ExchangeRateCacheRepository exchangeRateCacheRepository;
   private final ExchangeRateMapper exchangeRateMapper;
   private final ExchangeRateCacheMapper exchangeRateCacheMapper;
+  private final MarketCacheMetrics marketCacheMetrics;
 
   public ExchangeRatePersistenceAdapter(
       ExchangeRateRepository exchangeRateRepository,
       ExchangeRateCacheRepository exchangeRateCacheRepository,
       ExchangeRateMapper exchangeRateMapper,
-      ExchangeRateCacheMapper exchangeRateCacheMapper) {
+      ExchangeRateCacheMapper exchangeRateCacheMapper,
+      MarketCacheMetrics marketCacheMetrics) {
     this.exchangeRateRepository = exchangeRateRepository;
     this.exchangeRateCacheRepository = exchangeRateCacheRepository;
     this.exchangeRateMapper = exchangeRateMapper;
     this.exchangeRateCacheMapper = exchangeRateCacheMapper;
+    this.marketCacheMetrics = marketCacheMetrics;
   }
 
   @Override
@@ -38,10 +42,13 @@ public class ExchangeRatePersistenceAdapter implements ExchangeRatePersistence {
         exchangeRateCacheRepository.findByCurrencies(fromCurrency, toCurrency);
 
     if (cachedExchangeRates.isPresent()) {
+      marketCacheMetrics.recordHit("exchange_rate");
       return cachedExchangeRates.get().stream()
           .map(exchangeRateCacheMapper::toDomain)
           .toList();
     }
+
+    marketCacheMetrics.recordMiss("exchange_rate");
 
     List<ExchangeRate> exchangeRateList = exchangeRateRepository
         .findByCurrencies(fromCurrency, toCurrency)

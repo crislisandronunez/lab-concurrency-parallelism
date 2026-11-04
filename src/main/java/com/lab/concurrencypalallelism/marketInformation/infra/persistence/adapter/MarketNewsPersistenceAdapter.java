@@ -2,6 +2,7 @@ package com.lab.concurrencypalallelism.marketInformation.infra.persistence.adapt
 
 import com.lab.concurrencypalallelism.marketInformation.application.port.out.MarketNewsPersistence;
 import com.lab.concurrencypalallelism.marketInformation.domain.model.MarketNews;
+import com.lab.concurrencypalallelism.marketInformation.infra.metrics.MarketCacheMetrics;
 import com.lab.concurrencypalallelism.marketInformation.infra.persistence.mapper.MarketNewsMapper;
 import com.lab.concurrencypalallelism.marketInformation.infra.persistence.port.out.postgres.MarketNewsRepository;
 import com.lab.concurrencypalallelism.marketInformation.infra.persistence.port.out.redis.mapper.MarketNewsCacheMapper;
@@ -18,16 +19,19 @@ public class MarketNewsPersistenceAdapter implements MarketNewsPersistence {
   private final MarketNewsCacheRepository marketNewsCacheRepository;
   private final MarketNewsMapper marketNewsMapper;
   private final MarketNewsCacheMapper marketNewsCacheMapper;
+  private final MarketCacheMetrics marketCacheMetrics;
 
   public MarketNewsPersistenceAdapter(
       MarketNewsRepository marketNewsRepository,
       MarketNewsCacheRepository marketNewsCacheRepository,
       MarketNewsMapper marketNewsMapper,
-      MarketNewsCacheMapper marketNewsCacheMapper) {
+      MarketNewsCacheMapper marketNewsCacheMapper,
+      MarketCacheMetrics marketCacheMetrics) {
     this.marketNewsRepository = marketNewsRepository;
     this.marketNewsCacheRepository = marketNewsCacheRepository;
     this.marketNewsMapper = marketNewsMapper;
     this.marketNewsCacheMapper = marketNewsCacheMapper;
+    this.marketCacheMetrics = marketCacheMetrics;
   }
 
   @Override
@@ -37,10 +41,13 @@ public class MarketNewsPersistenceAdapter implements MarketNewsPersistence {
         marketNewsCacheRepository.findLatestFive();
 
     if (cachedNews.isPresent()) {
+      marketCacheMetrics.recordHit("market_news");
       return cachedNews.get().stream()
           .map(marketNewsCacheMapper::toDomain)
           .toList();
     }
+
+    marketCacheMetrics.recordMiss("market_news");
 
     List<MarketNews> marketNewsList = marketNewsRepository
         .findTop5ByOrderByTimeStampDesc()
