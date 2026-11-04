@@ -41,6 +41,7 @@ public class ProcessTransaction implements ProcessTransactionUseCase {
       metrics.stop(findAccountSample, "transaction", "find_account");
     }
 
+
     if (account.getStatus() != AccountStatus.ACTIVE) {
       throw new IllegalArgumentException("La cuenta no está activa");
     }
@@ -63,6 +64,7 @@ public class ProcessTransaction implements ProcessTransactionUseCase {
     } finally {
       metrics.stop(saveAccountSample, "transaction", "save_account");
     }
+
 
     Transaction transaction = Transaction.create(
         updatedAccount.getId(),

@@ -8,6 +8,7 @@ import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import jakarta.persistence.Version;
 import java.math.BigDecimal;
 import java.util.UUID;
 
@@ -28,16 +29,20 @@ public class AccountEntity {
   @Column(name = "status", nullable = false)
   @Enumerated(EnumType.STRING)
   private AccountStatus status;
+  @Version
+  @Column(name = "version", nullable = false)
+  private Long version;
 
   public AccountEntity() {
   }
 
-  public AccountEntity(UUID id, String holder, BigDecimal balance, Currency currency, AccountStatus status) {
+  public AccountEntity(UUID id, String holder, BigDecimal balance, Currency currency, AccountStatus status, Long version) {
     this.id = id;
     this.holder = holder;
     this.balance = balance;
     this.currency = currency;
     this.status = status;
+    this.version = version;
   }
 
   public UUID getId() {
@@ -58,5 +63,9 @@ public class AccountEntity {
 
   public AccountStatus getStatus() {
     return status;
+  }
+
+  public Long getVersion() {
+    return version;
   }
 }

@@ -13,23 +13,24 @@ public class Account {
   private BigDecimal balance;
   private final Currency currency;
   private AccountStatus status;
+  private final Long version;
 
-  private Account(UUID id, String holder, BigDecimal balance, Currency currency, AccountStatus status) {
+  private Account(UUID id, String holder, BigDecimal balance, Currency currency, AccountStatus status, Long version) {
     this.id = id;
     this.holder = holder;
     this.balance = balance;
     this.currency = currency;
     this.status = status;
+    this.version = version;
   }
 
   public static Account create(String holder, BigDecimal balance, Currency currency) {
     validate(holder, balance, currency);
-    return new Account(UUID.randomUUID(), holder, balance, currency, AccountStatus.ACTIVE);
+    return new Account(UUID.randomUUID(), holder, balance, currency, AccountStatus.ACTIVE, null);
   }
 
-  public static Account restore(UUID id, String holder, BigDecimal balance, Currency currency, AccountStatus status) {
-    validate(holder, balance, currency);
-    return new Account(id, holder, balance, currency, status);
+  public static Account restore(UUID id, String holder, BigDecimal balance, Currency currency, AccountStatus status, Long version) {
+    return new Account(id, holder, balance, currency, status, version);
   }
 
   private static void validate(String holder, BigDecimal balance, Currency currency) {
@@ -119,6 +120,10 @@ public class Account {
 
   public String getHolder() {
     return holder;
+  }
+
+  public Long getVersion() {
+    return version;
   }
 
   @Override
