@@ -2,76 +2,83 @@
 
 ## Entidades
 
-### Cuenta
+### Account
 
-Representa una cuenta bancaria utilizada para procesar transacciones.
+Representa una cuenta utilizada para procesar transacciones financieras.
 
-| Campo     | Tipo Java | Tipo PostgreSQL    | Descripción                          |
-|-----------|-----------|--------------------|--------------------------------------|
-| `id`      | `String`  | `VARCHAR(50)`      | Identificador único. Clave primaria. |
-| `titular` | `String`  | `VARCHAR(100)`     | Nombre del titular.                  |
-| `saldo`   | `double`  | `DOUBLE PRECISION` | Saldo actual.                        |
-| `moneda`  | `String`  | `VARCHAR(10)`      | Código de moneda: USD, EUR o ARS.    |
-| `activa`  | `boolean` | `BOOLEAN`          | Indica si la cuenta está activa.     |
+| Campo      | Tipo Java       | Tipo PostgreSQL | Descripción                                           |
+|------------|-----------------|-----------------|-------------------------------------------------------|
+| `id`       | `UUID`          | `UUID`          | Identificador único. Clave primaria.                  |
+| `holder`   | `String`        | `VARCHAR(255)`  | Nombre del titular.                                   |
+| `balance`  | `BigDecimal`    | `NUMERIC(19,2)` | Saldo de la cuenta.                                   |
+| `currency` | `Currency`      | `VARCHAR`       | Moneda: `USD`, `EUR` o `ARG`.                         |
+| `status`   | `AccountStatus` | `VARCHAR`       | Estado: `ACTIVE`, `INACTIVE`, `SUSPENDED` o `CLOSED`. |
 
-**Tabla:** `cuentas`.
+**Tabla:** `accounts`.
 
-### Transaccion
+Los campos se almacenan con restricciones `NOT NULL`. La moneda y el estado se persisten como texto.
 
-Registra movimientos financieros asociados con una cuenta.
+### Transaction
 
-| Campo       | Tipo Java | Tipo PostgreSQL    | Descripción                                      |
-|-------------|-----------|--------------------|--------------------------------------------------|
-| `id`        | `String`  | `VARCHAR(50)`      | Identificador único. Clave primaria.             |
-| `cuentaId`  | `String`  | `VARCHAR(50)`      | Cuenta asociada. Clave foránea a `cuentas.id`.   |
-| `tipo`      | `String`  | `VARCHAR(20)`      | DEBITO, CREDITO o TRANSFERENCIA.                 |
-| `monto`     | `double`  | `DOUBLE PRECISION` | Importe de la transacción.                       |
-| `fecha`     | `long`    | `BIGINT`           | Fecha en milisegundos desde Unix epoch.          |
-| `estado`    | `String`  | `VARCHAR(20)`      | PENDIENTE, COMPLETADA o RECHAZADA.               |
-| `categoria` | `String`  | `VARCHAR(50)`      | COMIDA, TRANSPORTE, SERVICIOS o ENTRETENIMIENTO. |
+Representa una transacción financiera asociada a una cuenta.
 
-**Tabla:** `transacciones`.
+| Campo       | Tipo Java        | Tipo PostgreSQL            | Descripción                                         |
+|-------------|------------------|----------------------------|-----------------------------------------------------|
+| `id`        | `UUID`           | `UUID`                     | Identificador único. Clave primaria.                |
+| `accountId` | `UUID`           | `UUID`                     | Identificador de la cuenta asociada (`account_id`). |
+| `type`      | `TransferType`   | `VARCHAR`                  | Tipo: `DEBIT`, `CREDIT` o `TRANSFER`.               |
+| `amount`    | `BigDecimal`     | `NUMERIC(19,2)`            | Importe de la transacción.                          |
+| `createdAt` | `Instant`        | `TIMESTAMP WITH TIME ZONE` | Momento de creación (`created_at`).                 |
+| `status`    | `TransferStatus` | `VARCHAR`                  | Estado: `PENDING`, `COMPLETED` o `FAILED`.          |
+| `category`  | `Category`       | `VARCHAR`                  | Categoría de la operación.                          |
+
+**Tabla:** `transactions`.
+
+Los campos se almacenan con restricciones `NOT NULL`. Los valores enum se persisten como texto.
+
+Las categorías disponibles son `FOOD`, `TRANSPORT`, `ENTERTAINMENT`, `UTILITIES`, `HEALTHCARE`,
+`EDUCATION`, `SHOPPING`, `TRAVEL` y `OTHER`.
 
 ## Relación entre entidades
 
 ```mermaid
- erDiagram
-    CUENTA ||--o{ TRANSACCION: registra
-    CUENTA {
-        string id PK
-        string titular
-        double saldo
-        string moneda
-        boolean activa
+erDiagram
+    ACCOUNT ||--o{ TRANSACTION: registra
+    ACCOUNT {
+        UUID id PK
+        String holder
+        BigDecimal balance
+        Currency currency
+        AccountStatus status
     }
-    TRANSACCION {
-        string id PK
-        string cuentaId FK
-        string tipo
-        double monto
-        long fecha
-        string estado
-        string categoria
+    TRANSACTION {
+        UUID id PK
+        UUID accountId
+        TransferType type
+        BigDecimal amount
+        Instant createdAt
+        TransferStatus status
+        Category category
     }
 ```
 
-Una cuenta puede tener muchas transacciones. Cada transacción referencia una cuenta mediante `cuentaId`.
+Una cuenta puede tener múltiples transacciones. `Transaction.accountId` identifica la cuenta asociada.
+La asociación se representa mediante UUID en el modelo, sin una relación JPA entre las entidades.
 
-## Índices previstos
+## Índices
 
-| Tabla           | Índice                        | Columna     |
-|-----------------|-------------------------------|-------------|
-| `transacciones` | `idx_transacciones_cuenta`    | `cuenta_id` |
-| `transacciones` | `idx_transacciones_fecha`     | `fecha`     |
-| `transacciones` | `idx_transacciones_categoria` | `categoria` |
+| Tabla          | Índice                        | Columna      |
+|----------------|-------------------------------|--------------|
+| `transactions` | `idx_transactions_account_id` | `account_id` |
+| `transactions` | `idx_transactions_created_at` | `created_at` |
+| `transactions` | `idx_transactions_category`   | `category`   |
+
+Las claves primarias de `accounts` y `transactions` se indexan mediante PostgreSQL.
 
 ## Alcance técnico del módulo
 
-- **Persistencia:** PostgreSQL mediante Spring Data JPA.
-- **Ejecución:** secuencial; cada etapa depende de la anterior.
-- **Operaciones previstas:** validar cuenta activa, verificar saldo, procesar débito y registrar transacción.
-- **Redis:** no se utiliza en este módulo, para conservar una medición base sin caché.
-- **Métricas:** tiempo total del procesamiento, duración de consultas y conexiones del pool HikariCP.
-
-> Los campos y valores se basan en el documento del proyecto. Las validaciones de nulidad, precisión
-> monetaria, restricciones adicionales y reglas de concurrencia todavía requieren decisiones de diseño.
+- **Persistencia:** PostgreSQL mediante Spring Data JPA e Hibernate.
+- **Procesamiento:** secuencial; cada operación del caso de uso depende de la anterior.
+- **Operación del caso de uso:** validar cuenta, verificar saldo, debitar y registrar una transacción.
+- **Redis:** no se utiliza en el procesamiento de este módulo.
+- **Métricas:** medición de búsquedas y escrituras de persistencia con Micrometer y observación del pool HikariCP.
