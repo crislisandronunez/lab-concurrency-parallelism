@@ -1,4 +1,4 @@
-package com.lab.concurrencypalallelism.marketInformation.model;
+package com.lab.concurrencypalallelism.marketInformation.domain.model;
 
 import java.math.BigDecimal;
 import java.time.Instant;

@@ -11,9 +11,9 @@ import com.lab.concurrencypalallelism.marketInformation.application.result.Marke
 import com.lab.concurrencypalallelism.marketInformation.application.result.MarketNewsResult;
 import com.lab.concurrencypalallelism.marketInformation.application.result.StockResult;
 import com.lab.concurrencypalallelism.marketInformation.domain.enums.Currency;
-import com.lab.concurrencypalallelism.marketInformation.model.ExchangeRate;
-import com.lab.concurrencypalallelism.marketInformation.model.MarketNews;
-import com.lab.concurrencypalallelism.marketInformation.model.Stocks;
+import com.lab.concurrencypalallelism.marketInformation.domain.model.ExchangeRate;
+import com.lab.concurrencypalallelism.marketInformation.domain.model.MarketNews;
+import com.lab.concurrencypalallelism.marketInformation.domain.model.Stocks;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;

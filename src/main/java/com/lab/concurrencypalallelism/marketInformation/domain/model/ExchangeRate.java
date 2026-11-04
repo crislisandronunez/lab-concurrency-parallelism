@@ -1,18 +1,22 @@
-package com.lab.concurrencypalallelism.marketInformation.model;
+package com.lab.concurrencypalallelism.marketInformation.domain.model;
 
 import com.lab.concurrencypalallelism.marketInformation.domain.enums.Currency;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.Objects;
+import java.util.UUID;
 
 public class ExchangeRate {
 
+  private final UUID id;
   private final Currency fromCurrency;
   private final Currency toCurrency;
   private BigDecimal rate;
   private Instant updateAt;
 
-  private ExchangeRate(Currency fromCurrency, Currency toCurrency, BigDecimal rate, Instant updateAt) {
+  private ExchangeRate(UUID id, Currency fromCurrency, Currency toCurrency,
+                       BigDecimal rate, Instant updateAt) {
+    this.id = id;
     this.fromCurrency = fromCurrency;
     this.toCurrency = toCurrency;
     this.rate = rate;
@@ -21,12 +25,12 @@ public class ExchangeRate {
 
   public static ExchangeRate create(Currency fromCurrency, Currency toCurrency, BigDecimal rate) {
     validateData(fromCurrency, toCurrency, rate);
-    return new ExchangeRate(fromCurrency, toCurrency, rate, Instant.now());
+    return new ExchangeRate(UUID.randomUUID(), fromCurrency, toCurrency, rate, Instant.now());
   }
 
   public static ExchangeRate restore(
-      Currency fromCurrency, Currency toCurrency, BigDecimal rate, Instant updateAt) {
-    return new ExchangeRate(fromCurrency, toCurrency, rate, updateAt);
+      UUID id, Currency fromCurrency, Currency toCurrency, BigDecimal rate, Instant updateAt) {
+    return new ExchangeRate(id, fromCurrency, toCurrency, rate, updateAt);
   }
 
   private static void validateData(Currency fromCurrency, Currency toCurrency, BigDecimal rate) {
@@ -52,6 +56,10 @@ public class ExchangeRate {
     this.updateAt = Instant.now();
   }
 
+  public UUID getId() {
+    return id;
+  }
+
   public Currency getFromCurrency() {
     return fromCurrency;
   }
@@ -71,11 +79,11 @@ public class ExchangeRate {
   @Override
   public boolean equals(Object o) {
     if (!(o instanceof ExchangeRate that)) return false;
-    return fromCurrency == that.fromCurrency && toCurrency == that.toCurrency;
+    return Objects.equals(id, that.id);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(fromCurrency, toCurrency);
+    return Objects.hashCode(id);
   }
 }

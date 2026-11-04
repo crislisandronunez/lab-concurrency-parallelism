@@ -1,18 +1,20 @@
-
-package com.lab.concurrencypalallelism.marketInformation.model;
+package com.lab.concurrencypalallelism.marketInformation.domain.model;
 
 import com.lab.concurrencypalallelism.marketInformation.domain.enums.Sentiment;
 import java.time.Instant;
 import java.util.Objects;
+import java.util.UUID;
 
 public class MarketNews {
 
+  private final UUID id;
   private final String title;
   private final String source;
   private final Instant timestamp;
   private Sentiment sentiment;
 
-  private MarketNews(String title, String source, Instant timestamp, Sentiment sentiment) {
+  private MarketNews(UUID id, String title, String source, Instant timestamp, Sentiment sentiment) {
+    this.id = id;
     this.title = title;
     this.source = source;
     this.timestamp = timestamp;
@@ -21,12 +23,12 @@ public class MarketNews {
 
   public static MarketNews create(String title, String source, Sentiment sentiment) {
     validateData(title, source, sentiment);
-    return new MarketNews(title.trim(), source.trim(), Instant.now(), sentiment);
+    return new MarketNews(UUID.randomUUID(), title.trim(), source.trim(), Instant.now(), sentiment);
   }
 
   public static MarketNews restore(
-      String title, String source, Instant timestamp, Sentiment sentiment) {
-    return new MarketNews(title, source, timestamp, sentiment);
+      UUID id, String title, String source, Instant timestamp, Sentiment sentiment) {
+    return new MarketNews(id, title, source, timestamp, sentiment);
   }
 
   private static void validateData(String title, String source, Sentiment sentiment) {
@@ -54,6 +56,10 @@ public class MarketNews {
     this.sentiment = sentiment;
   }
 
+  public UUID getId() {
+    return id;
+  }
+
   public String getTitle() {
     return title;
   }
@@ -73,11 +79,11 @@ public class MarketNews {
   @Override
   public boolean equals(Object o) {
     if (!(o instanceof MarketNews that)) return false;
-    return Objects.equals(title, that.title);
+    return Objects.equals(id, that.id);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hashCode(title);
+    return Objects.hashCode(id);
   }
 }
