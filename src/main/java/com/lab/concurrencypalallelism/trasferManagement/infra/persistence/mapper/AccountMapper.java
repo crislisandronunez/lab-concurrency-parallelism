@@ -14,7 +14,8 @@ public class AccountMapper {
         account.getHolder(),
         account.getBalance(),
         account.getCurrency(),
-        account.getStatus()
+        account.getStatus(),
+        account.getVersion()
     );
   }
 
@@ -24,7 +25,8 @@ public class AccountMapper {
         entity.getHolder(),
         entity.getBalance(),
         entity.getCurrency(),
-        entity.getStatus()
+        entity.getStatus(),
+        entity.getVersion()
     );
   }
 }
