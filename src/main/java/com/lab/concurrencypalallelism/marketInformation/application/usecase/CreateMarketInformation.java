@@ -1,3 +1,4 @@
+
 package com.lab.concurrencypalallelism.marketInformation.application.usecase;
 
 import com.lab.concurrencypalallelism.marketInformation.application.command.GetMarketInformationCommand;
@@ -18,7 +19,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
-
+import java.util.concurrent.TimeUnit;
 
 public class CreateMarketInformation implements MarketInformation {
 
@@ -28,7 +29,12 @@ public class CreateMarketInformation implements MarketInformation {
   private final MarketMetrics marketMetrics;
   private final Executor executor;
 
-  public CreateMarketInformation(StocksPersistence stocksPersistence, ExchangeRatePersistence exchangeRatePersistence, MarketNewsPersistence marketNewsPersistence, MarketMetrics marketMetrics, Executor executor) {
+  public CreateMarketInformation(
+      StocksPersistence stocksPersistence,
+      ExchangeRatePersistence exchangeRatePersistence,
+      MarketNewsPersistence marketNewsPersistence,
+      MarketMetrics marketMetrics,
+      Executor executor) {
     this.stocksPersistence = stocksPersistence;
     this.exchangeRatePersistence = exchangeRatePersistence;
     this.marketNewsPersistence = marketNewsPersistence;
@@ -36,9 +42,8 @@ public class CreateMarketInformation implements MarketInformation {
     this.executor = executor;
   }
 
-
   @Override
-  public MarketInformationResult getMarketInformation (GetMarketInformationCommand command) {
+  public MarketInformationResult getMarketInformation(GetMarketInformationCommand command) {
 
     Object getMarketInformationSample = marketMetrics.start();
 
@@ -58,21 +63,21 @@ public class CreateMarketInformation implements MarketInformation {
 
       CompletableFuture<List<ExchangeRateResult>> exchangeRateResultCompletableFuture =
           CompletableFuture.supplyAsync(
-              () -> getExchangeRate(command.fromCurrency(),command.toCurrency()),
+              () -> getExchangeRate(command.fromCurrency(), command.toCurrency()),
               executor
           );
 
-     CompletableFuture<List<MarketNewsResult>> marketNewsResultCompleteFuture =
-         CompletableFuture.supplyAsync(
-             () -> getMarketNews(),
-             executor
-         );
+      CompletableFuture<List<MarketNewsResult>> marketNewsResultCompleteFuture =
+          CompletableFuture.supplyAsync(
+              () -> getMarketNews(),
+              executor
+          );
 
       CompletableFuture.allOf(
           stockResultCompletableFuture,
           exchangeRateResultCompletableFuture,
           marketNewsResultCompleteFuture
-      ).join();
+      ).orTimeout(5, TimeUnit.SECONDS).join();
 
       stockResult = stockResultCompletableFuture.join();
       exchangeRateResultList = exchangeRateResultCompletableFuture.join();
@@ -86,11 +91,11 @@ public class CreateMarketInformation implements MarketInformation {
       );
     }
 
-   return  new MarketInformationResult(
-            stockResult,
-            exchangeRateResultList,
-            marketNewsResultList
-        );
+    return new MarketInformationResult(
+        stockResult,
+        exchangeRateResultList,
+        marketNewsResultList
+    );
   }
 
   private StockResult getStock(String symbol) {
@@ -118,17 +123,18 @@ public class CreateMarketInformation implements MarketInformation {
         stock.getPrice(),
         stock.getChangePercent(),
         stock.getVolume(),
-        stock.getUpdateAt());
+        stock.getUpdateAt()
+    );
   }
 
-  private List<ExchangeRateResult> getExchangeRate(Currency currency1, Currency currency2){
+  private List<ExchangeRateResult> getExchangeRate(Currency currency1, Currency currency2) {
 
     Object findExchangeRateSample = marketMetrics.start();
 
     List<ExchangeRate> exchangeRatetList;
 
     try {
-      exchangeRatetList = exchangeRatePersistence.findByCurrencies(currency1,currency2);
+      exchangeRatetList = exchangeRatePersistence.findByCurrencies(currency1, currency2);
 
     } finally {
       marketMetrics.stop(
@@ -137,9 +143,10 @@ public class CreateMarketInformation implements MarketInformation {
           "find_by_currencies"
       );
     }
+
     List<ExchangeRateResult> exchangeRateResultList = new ArrayList<>();
 
-    for(ExchangeRate exchangeRate : exchangeRatetList){
+    for (ExchangeRate exchangeRate : exchangeRatetList) {
       exchangeRateResultList.add(new ExchangeRateResult(
           exchangeRate.getFromCurrency(),
           exchangeRate.getToCurrency(),
@@ -147,16 +154,17 @@ public class CreateMarketInformation implements MarketInformation {
           exchangeRate.getUpdateAt()
       ));
     }
+
     return exchangeRateResultList;
   }
 
-  private List<MarketNewsResult> getMarketNews(){
+  private List<MarketNewsResult> getMarketNews() {
 
     Object findByMarketNewSample = marketMetrics.start();
 
     List<MarketNews> marketNewsList;
 
-    try{
+    try {
       marketNewsList = marketNewsPersistence.findLatestFive();
     } finally {
       marketMetrics.stop(
@@ -165,9 +173,10 @@ public class CreateMarketInformation implements MarketInformation {
           "find_latest_five"
       );
     }
+
     List<MarketNewsResult> marketNewsResultList = new ArrayList<>();
 
-    for (MarketNews marketNews :marketNewsList){
+    for (MarketNews marketNews : marketNewsList) {
       marketNewsResultList.add(new MarketNewsResult(
           marketNews.getTitle(),
           marketNews.getSource(),
@@ -175,14 +184,7 @@ public class CreateMarketInformation implements MarketInformation {
           marketNews.getSentiment()
       ));
     }
+
     return marketNewsResultList;
-
-
-
-
-
-
-
   }
-
 }
