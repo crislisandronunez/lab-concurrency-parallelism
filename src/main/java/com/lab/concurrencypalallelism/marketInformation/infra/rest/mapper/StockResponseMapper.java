@@ -4,8 +4,8 @@ import com.lab.concurrencypalallelism.marketInformation.application.result.Stock
 import com.lab.concurrencypalallelism.marketInformation.infra.rest.dto.StockResponse;
 import org.springframework.stereotype.Component;
 
-@Component
-public class StockMapper {
+@Component("StockResponseMapper")
+public class StockResponseMapper {
 
   public StockResponse toResponse(StockResult result) {
     return new StockResponse(

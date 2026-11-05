@@ -6,19 +6,19 @@ import com.lab.concurrencypalallelism.marketInformation.infra.rest.dto.GetMarket
 import com.lab.concurrencypalallelism.marketInformation.infra.rest.dto.MarketInformationResponse;
 import org.springframework.stereotype.Component;
 
-@Component
-public class MarketInformationMapper {
+@Component("MarketInformationResponseMapper")
+public class MarketInformationResponseMapper {
 
-  private final StockMapper stockMapper;
-  private final ExchangeRateMapper exchangeRateMapper;
-  private final MarketNewsMapper marketNewsMapper;
+  private final StockResponseMapper stockMapper;
+  private final ExchangeRateResponseMapper exchangeRateResponseMapper;
+  private final MarketNewsResponseMapper marketNewsMapper;
 
-  public MarketInformationMapper(
-      StockMapper stockMapper,
-      ExchangeRateMapper exchangeRateMapper,
-      MarketNewsMapper marketNewsMapper) {
+  public MarketInformationResponseMapper(
+      StockResponseMapper stockMapper,
+      ExchangeRateResponseMapper exchangeRateResponseMapper,
+      MarketNewsResponseMapper marketNewsMapper) {
     this.stockMapper = stockMapper;
-    this.exchangeRateMapper = exchangeRateMapper;
+    this.exchangeRateResponseMapper = exchangeRateResponseMapper;
     this.marketNewsMapper = marketNewsMapper;
   }
 
@@ -34,7 +34,7 @@ public class MarketInformationMapper {
     return new MarketInformationResponse(
         stockMapper.toResponse(result.stockResult()),
         result.exchangeRateResult().stream()
-            .map(exchangeRateMapper::toResponse)
+            .map(exchangeRateResponseMapper::toResponse)
             .toList(),
         result.marketNewsResult().stream()
             .map(marketNewsMapper::toResponse)

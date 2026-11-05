@@ -20,9 +20,9 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 @RestControllerAdvice(
     basePackages = "com.lab.concurrencypalallelism.marketInformation"
 )
-public class GlobalExceptionHandler {
+public class MarketInformationExceptionHandler {
 
-  private static final Logger log = LoggerFactory.getLogger(GlobalExceptionHandler.class);
+  private static final Logger log = LoggerFactory.getLogger(MarketInformationExceptionHandler.class);
 
   @ExceptionHandler(CompletionException.class)
   public ResponseEntity<ErrorResponse> handleCompletion(

@@ -6,7 +6,7 @@ import com.lab.concurrencypalallelism.marketInformation.application.port.in.Mark
 import com.lab.concurrencypalallelism.marketInformation.application.result.MarketInformationResult;
 import com.lab.concurrencypalallelism.marketInformation.infra.rest.dto.GetMarketInformationRequest;
 import com.lab.concurrencypalallelism.marketInformation.infra.rest.dto.MarketInformationResponse;
-import com.lab.concurrencypalallelism.marketInformation.infra.rest.mapper.MarketInformationMapper;
+import com.lab.concurrencypalallelism.marketInformation.infra.rest.mapper.MarketInformationResponseMapper;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -19,11 +19,11 @@ import org.springframework.web.bind.annotation.RestController;
 public class MarketInformationController {
 
   private final MarketInformation marketInformation;
-  private final MarketInformationMapper mapper;
+  private final MarketInformationResponseMapper mapper;
 
   public MarketInformationController(
       MarketInformation marketInformation,
-      MarketInformationMapper mapper) {
+      MarketInformationResponseMapper mapper) {
     this.marketInformation = marketInformation;
     this.mapper = mapper;
   }
